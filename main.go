@@ -67,6 +67,8 @@ func createMovie(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	var movie Movie
+
+	// decode the json data
 	_ = json.NewDecoder(r.Body).Decode(&movie)
 
 	// give the movie a unique ID and convert to string
@@ -77,7 +79,29 @@ func createMovie(w http.ResponseWriter, r *http.Request) {
 }
 
 func updateMovie(w http.ResponseWriter, r *http.Request) {
-	
+	w.Header().Set("Content-Type", "application/json")
+
+	params := mux.Vars(r)
+
+	for index, item := range movies {
+		if item.ID == params["id"] {
+			// delete the movie...
+			movies = append(movies[:index], movies[index+1:]...)
+
+			// create new movie and append
+			var movie Movie
+			_ = json.NewDecoder(r.Body).Decode(&movie)
+
+			// set the new id to the id of the deleted movie
+			movie.ID = params["id"]
+
+			movies = append(movies, movie)
+
+			json.NewEncoder(w).Encode(movie)
+			
+			return
+		}
+	}
 }
 
 func main() {
